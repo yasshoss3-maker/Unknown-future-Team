@@ -24,7 +24,14 @@ The robot is built using the LEGO Mindstorms EV3 kit, and includes:
 ---
 
 ## 3. Programming
-Details to be added here.
+Details to be added here.## 3. Programming
+
+* **Architecture:** Programmed in Python (using EV3 Python / MicroPython) on the LEGO EV3 Brick.
+* **Control Loop:** Runs a high-frequency main loop that polls ultrasonic/infrared sensors for wall distance monitoring and reads the visual sensor/camera feed for real-time obstacle tracking.
+* **Steering & Steering Correction:** Implements a Proportional-Derivative (PD) control algorithm to continuously adjust steering angles based on wall distances, maintaining a consistent offset from inner/outer track boundaries.
+* **Vision & Obstacle Classification:** Uses HSV color thresholding to detect green and red traffic sign pillars. The vision subsystem returns bounding boxes, allowing the robot to determine whether to pass on the left or right side of the obstacle.
+
+---
 
 ---
 
@@ -36,5 +43,11 @@ Details to be added here.
 
 ---
 
+##
 ## 5. Strategy
-Explanation of the navigation and obstacle-avoidance strategy to be added here.
+
+* **Wall Following & Navigation:** The robot relies on continuous distance sensing to track walls and dynamically center itself within lane boundaries, navigating straight corridors and standard corner turns smoothly.
+* **Color-Based Obstacle Avoidance:**
+  * **Green Obstacle:** When a green pillar is identified, the robot steers to pass on the **right** side of the block.
+  * **Red Obstacle:** When a red pillar is identified, the robot steers to pass on the **left** side of the block.
+* **Cornering & Emergency Recovery:** If distance sensors detect an impending wall collision or sudden track end, the robot slows down, executes a calibrated pivot turn away from the barrier, and resumes forward wall-tracking.
