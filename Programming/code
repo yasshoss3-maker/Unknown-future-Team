@@ -1,0 +1,145 @@
+
+from pybricks.hubs import EV3Brick
+from pybricks.ev3devices import Motor, UltrasonicSensor, InfraredSensor
+from pybricks.parameters import Port, Direction
+from pybricks.tools import wait
+from pixy2 import Pixy2
+
+ev3 = EV3Brick()
+
+pixy = Pixy2(port=4)
+
+pixy.set_lamp(1, 1)
+
+
+#Check tne Nearest Block
+def get_blocks():
+    nr_blocks_1, blocks_1 = pixy.get_blocks(sigmap=1, max_blocks=5)
+    nr_blocks_2, blocks_2 = pixy.get_blocks(sigmap=2, max_blocks=5)
+    nr_blocks_3, blocks_3 = pixy.get_blocks(sigmap=3, max_blocks=5)
+
+    for block in blocks_1 + blocks_2 + blocks_3:
+        if block.height * block.width >= 1000 and block.height > 45 and block.width < 85:
+            return block.sig
+
+#تعريف السينسورات
+front_sensor = InfraredSensor(Port.S1)
+left_sensor  = UltrasonicSensor(Port.S3)
+right_sensor = UltrasonicSensor(Port.S2)
+
+#تعريف المواتير
+steering_motor = Motor(Port.B) 
+drive_motor = Motor(Port.A)
+
+
+DIR_check = 0
+Dir = 'n' # اتجاه الروبوت , يمين = صفر ,شمال = 1
+
+
+SAFE_DISTANCE_FRONT = 30  # المسافة الآمنة من الأمام (10 سم)
+SAFE_DISTANCE_SIDE  = 400 # المسافة الآمنة من الجانب (40 سم)
+BASE_SPEED = 700        
+# تصفير الزاويه
+steering_motor.reset_angle(0)
+
+def steer(angle):
+    target_angle = max(-45, min(45, angle))
+    steering_motor.track_target(target_angle)
+
+
+# بييب
+ev3.speaker.beep()
+
+while True:
+    dist_front = front_sensor.distance()
+    dist_left  = left_sensor.distance()
+    dist_right = right_sensor.distance()
+    sig_E = get_blocks()
+
+
+    if DIR_check == 0:
+        if dist_right > dist_left and dist_front < SAFE_DISTANCE_FRONT:
+            drive_motor.run(-100)
+            wait(320)
+            steer(-45)
+            drive_motor.run(250)
+            wait(700)
+            steer(45)
+            drive_motor.run(500)
+            Dir = 'l' 
+            DIR_check = 1
+        elif dist_right < dist_left and dist_front < SAFE_DISTANCE_FRONT:
+            drive_motor.run(-100)
+            wait(320)
+            steer(45)
+            drive_motor.run(250)
+            wait(700)
+            steer(-45)
+            drive_motor.run(500)
+            Dir = 'r'  
+            DIR_check = 1
+        elif dist_front > SAFE_DISTANCE_FRONT:
+            drive_motor.run(500) 
+            if dist_left >= 1500:
+                Dir = 'l'
+                DIR_check = 1
+            elif dist_right >= 1500:
+                Dir = 'r'
+                DIR_check = 1
+        ev3.screen.print(Dir)
+        
+
+            
+    elif dist_front < SAFE_DISTANCE_FRONT:
+        if Dir == 'l':
+            drive_motor.run(-500)
+            wait(500)
+            steer(-45)
+            wait(1500)
+            drive_motor.run(500)
+            steer(45)
+            wait(1000)
+        elif Dir == 'r':
+            drive_motor.run(-500)
+            wait(500)
+            steer(45)
+            wait(1500)
+            drive_motor.run(500)
+            steer(-45)
+            wait(1000)
+        
+           
+        
+
+    elif sig_E == 1 or sig_E == 2 or sig_E == 3:
+        ev3.speaker.beep()
+        drive_motor.run(BASE_SPEED)
+        if sig_E == 1 :
+            steer(45)
+            sig_E = get_blocks()
+            while sig_E == 1:
+                sig_E = get_blocks()  
+            wait(400)
+            steer(-45)
+        elif sig_E == 2:
+            steer(-45)
+            sig_E = get_blocks()
+            while sig_E == 2 or sig_E == 3:
+                sig_E = get_blocks()
+            wait(400)     
+            steer(45)
+        
+    else:
+        if Dir == 'l':
+            Right_Value = (SAFE_DISTANCE_SIDE-dist_right)/2.7
+           # ev3.screen.print(Right_Value)
+            steer(Right_Value)
+            drive_motor.run(BASE_SPEED)
+        elif Dir == 'r':
+            Right_Value = (dist_left-SAFE_DISTANCE_SIDE)/2.7
+           # ev3.screen.print(Right_Value)
+            steer(Right_Value)
+            drive_motor.run(BASE_SPEED)
+        
+    
+    wait(20)
