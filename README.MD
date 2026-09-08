@@ -40,6 +40,7 @@ Details to be added here.## 3. Programming
 - `t-photos/` - Photos of the team members
 - `v-photos/` - Photos of the robot from all angles
 - `video/` - Link to a video of the robot in action
+- `previous-iterations
 
 ---
 
