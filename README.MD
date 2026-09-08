@@ -18,7 +18,7 @@ The robot is built using the LEGO Mindstorms EV3 kit, and includes:
 - LEGO EV3 Brick (main controller)
 - Two motors for driving the wheels
 - Ultrasonic / Infrared sensor for detecting obstacles and distances
-- A camera for detecting colored obstacles (red and green)
+- A camera for detecting colored obstacles (red and green)Pixy2
 - 4 wheels
 
 ---
